@@ -21,8 +21,8 @@ bucket=rental-listings notification_phone_number="+490177853...." cdk deploy
 
 ## Todo
 
-Doing all these things in a lambda function at once, is not ideal. We can break the current lambda function into 3 independent pieces.
+Doing all these things in a lambda function at once is not ideal. We can break the current lambda function into 3 independent functions.
 
-1. Lambda #1: crawl the page, insert listings into dynamodb. This will be triggered by EventBridge rule.
-2. Lambda #2: read the latest listings from dynamodb, produce an html report and store on S3. This will be triggered by a dynamodb insert event.
-3. Lambda #3: send the public url of the html report via a SMS message. This will be triggered by an S3 file created event.
+1. Lambda #1: Crawl the page, insert listings into dynamodb. This will be triggered by an EventBridge rule.
+2. Lambda #2: Read the latest listings from dynamodb, produce an html report and store on S3. This will be triggered by a dynamodb insert event.
+3. Lambda #3: Send the public url of the html report via a SMS message. This will be triggered by an S3 file created event.
