@@ -19,10 +19,8 @@ Bucket name (and also will be used for dynamodb table name) and phone number mus
 bucket=rental-listings notification_phone_number="+490177853...." cdk deploy
 ```
 
-## Todo
+## Architecture
 
-Doing all these things in a lambda function at once is not ideal. We can break the current lambda function into 3 independent functions.
+1. An EventBridge rule trigers the crawler lambda function at specified intervals (once a day by default). Crawler lambda function crawls the page, extracts the listing links, addresses and prices and inserts into dynamodb table. 
 
-1. Lambda #1: Crawl the page, insert listings into dynamodb. This will be triggered by an EventBridge rule.
-2. Lambda #2: Read the latest listings from dynamodb, produce an html report and store on S3. This will be triggered by a dynamodb insert event.
-3. Lambda #3: Send the public url of the html report via a SMS message. This will be triggered by an S3 file created event.
+2. Dynamodb event stream triggers report creator lambda function. 
