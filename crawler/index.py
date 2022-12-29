@@ -94,32 +94,6 @@ def get_linstings():
     return ret
 
 
-def render_html(listings):
-    today = date.today().strftime("%B %d, %Y")
-
-    str_listings = []
-    for listing in listings:
-        rend = f"""
-            <div>
-                <a href="{listing['link']}" target="_blank">[{listing['rent']}] - {listing['address']}</a>
-            </div>
-        """
-        str_listings.append(rend)
-    rend_listings = "".join(str_listings)
-
-    html_output = f"""
-        <html>
-            <head><title>Evler</title></head>
-            <body>
-                <h3>Tarama Tarihi: {today}</h3>
-                {rend_listings}
-            </body>
-        </html>
-    """
-
-    return html_output
-
-
 def handler(event, context):
     bucket = os.environ.get('bucket')
 
@@ -131,38 +105,9 @@ def handler(event, context):
 
         table.put_item(Item={
             'createTime': time.time_ns(),
+            'createDate': f'{date.today().strftime("%b-%d-%Y")}',
             'listings': listings
         })
 
     except Exception as ex:
         LOG.error("Error writing to DynamoDB: " + str(ex))
-
-    try:
-        s3 = boto3.client("s3")
-        key = f'{date.today().strftime("%b-%d-%Y")}.html'
-        
-        s3.put_object(
-            Body=render_html(listings), 
-            Bucket=bucket, 
-            Key=key,
-            ContentType='text/html'
-        )
-        public_url = '%s/%s/%s' % (s3.meta.endpoint_url, bucket, key)
-        
-    except Exception as ex:
-        LOG.error("Error writing to S3")
-
-    try:
-        sns = boto3.client('sns')
-        sns.publish(
-            PhoneNumber = os.environ.get('notification_phone_number'),
-            Message=f"Yeni evler: {public_url}",
-            MessageAttributes={
-                'AWS.SNS.SMS.SenderID': {
-                    'DataType': 'String',
-                    'StringValue': "YortucEmlak"
-                }}
-        )
-
-    except Exception as ex:
-        LOG.error("Error sending sms")
